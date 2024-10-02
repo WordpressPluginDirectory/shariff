@@ -12,7 +12,8 @@ if ( ! class_exists( 'WP' ) ) {
 }
 
 // Set services that have a share count API / backend.
-$shariff3uu_services_backend = array( 'facebook', 'pinterest', 'reddit', 'tumblr', 'vk', 'addthis', 'odnoklassniki', 'buffer' );
+#$shariff3uu_services_backend = array( 'facebook', 'pinterest', 'reddit', 'tumblr', 'vk', 'odnoklassniki', 'buffer' );
+$shariff3uu_services_backend = array( 'facebook', 'pinterest', 'tumblr', 'vk', 'odnoklassniki', 'buffer' );
 
 // Adds the actions for the admin page.
 add_action( 'admin_menu', 'shariff3uu_add_admin_menu' );
@@ -839,7 +840,7 @@ function shariff3uu_text_services_render() {
 		$services = '';
 	}
 	echo '<input type="text" name="shariff3uu_basic[services]" value="' . esc_html( $services ) . '" size="90" placeholder="mastodon|facebook|linkedin|info">';
-	echo '<p><code>addthis|bitcoin|buffer|diaspora|facebook|flipboard|info|linkedin|mailto|mastodon|mewe|mix</code></p>';
+	echo '<p><code>bitcoin|buffer|diaspora|facebook|flipboard|info|linkedin|mailto|mastodon|mewe|mix</code></p>';
 	echo '<p><code>odnoklassniki|patreon|paypal|paypalme|pinterest|pocket|printer|reddit|rss|sms</code></p>';
 	echo '<p><code>telegram|threema|tumblr|twitter|vk|wallabag|weibo|whatsapp|xing</code></p>';
 	echo '<p>' . esc_html__( 'Use the pipe sign | (Alt Gr + &lt; or &#8997; + 7) between two or more services.', 'shariff' ) . '</p>';
@@ -850,23 +851,23 @@ function shariff3uu_text_services_render() {
  */
 function shariff3uu_multiplecheckbox_add_after_render() {
 	// Add after all posts.
-	echo '<p><input type="checkbox" name="shariff3uu_basic[add_after][posts]" ';
-	if ( isset( $GLOBALS['shariff3uu_basic']['add_after']['posts'] ) ) {
-		echo checked( $GLOBALS['shariff3uu_basic']['add_after']['posts'], 1, 0 );
+	echo '<p><input type="checkbox" name="shariff3uu_basic[add_after][post]" ';
+	if ( isset( $GLOBALS['shariff3uu_basic']['add_after']['post'] ) ) {
+		echo checked( $GLOBALS['shariff3uu_basic']['add_after']['post'], 1, 0 );
 	}
 	echo ' value="1">' . esc_html__( 'Posts', 'shariff' ) . '</p>';
 
 	// Add after all posts (blog page).
-	echo '<p><input type="checkbox" name="shariff3uu_basic[add_after][posts_blogpage]" ';
-	if ( isset( $GLOBALS['shariff3uu_basic']['add_after']['posts_blogpage'] ) ) {
-		echo checked( $GLOBALS['shariff3uu_basic']['add_after']['posts_blogpage'], 1, 0 );
+	echo '<p><input type="checkbox" name="shariff3uu_basic[add_after][blogpage]" ';
+	if ( isset( $GLOBALS['shariff3uu_basic']['add_after']['blogpage'] ) ) {
+		echo checked( $GLOBALS['shariff3uu_basic']['add_after']['blogpage'], 1, 0 );
 	}
 	echo ' value="1">' . esc_html__( 'Posts (blog page)', 'shariff' ) . '</p>';
 
 	// Add after all pages.
-	echo '<p><input type="checkbox" name="shariff3uu_basic[add_after][pages]" ';
-	if ( isset( $GLOBALS['shariff3uu_basic']['add_after']['pages'] ) ) {
-		echo checked( $GLOBALS['shariff3uu_basic']['add_after']['pages'], 1, 0 );
+	echo '<p><input type="checkbox" name="shariff3uu_basic[add_after][page]" ';
+	if ( isset( $GLOBALS['shariff3uu_basic']['add_after']['page'] ) ) {
+		echo checked( $GLOBALS['shariff3uu_basic']['add_after']['page'], 1, 0 );
 	}
 	echo ' value="1">' . esc_html__( 'Pages', 'shariff' ) . '</p>';
 
@@ -900,23 +901,23 @@ function shariff3uu_multiplecheckbox_add_after_render() {
  */
 function shariff3uu_multiplecheckbox_add_before_render() {
 	// Add before all posts.
-	echo '<p><input type="checkbox" name="shariff3uu_basic[add_before][posts]" ';
-	if ( isset( $GLOBALS['shariff3uu_basic']['add_before']['posts'] ) ) {
-		echo checked( $GLOBALS['shariff3uu_basic']['add_before']['posts'], 1, 0 );
+	echo '<p><input type="checkbox" name="shariff3uu_basic[add_before][post]" ';
+	if ( isset( $GLOBALS['shariff3uu_basic']['add_before']['post'] ) ) {
+		echo checked( $GLOBALS['shariff3uu_basic']['add_before']['post'], 1, 0 );
 	}
 	echo ' value="1">' . esc_html__( 'Posts', 'shariff' ) . '</p>';
 
 	// Add before all posts (blog page).
-	echo '<p><input type="checkbox" name="shariff3uu_basic[add_before][posts_blogpage]" ';
-	if ( isset( $GLOBALS['shariff3uu_basic']['add_before']['posts_blogpage'] ) ) {
-		echo checked( $GLOBALS['shariff3uu_basic']['add_before']['posts_blogpage'], 1, 0 );
+	echo '<p><input type="checkbox" name="shariff3uu_basic[add_before][blogpage]" ';
+	if ( isset( $GLOBALS['shariff3uu_basic']['add_before']['blogpage'] ) ) {
+		echo checked( $GLOBALS['shariff3uu_basic']['add_before']['blogpage'], 1, 0 );
 	}
 	echo ' value="1">' . esc_html__( 'Posts (blog page)', 'shariff' ) . '</p>';
 
 	// Add before all pages.
-	echo '<p><input type="checkbox" name="shariff3uu_basic[add_before][pages]" ';
-	if ( isset( $GLOBALS['shariff3uu_basic']['add_before']['pages'] ) ) {
-		echo checked( $GLOBALS['shariff3uu_basic']['add_before']['pages'], 1, 0 );
+	echo '<p><input type="checkbox" name="shariff3uu_basic[add_before][page]" ';
+	if ( isset( $GLOBALS['shariff3uu_basic']['add_before']['page'] ) ) {
+		echo checked( $GLOBALS['shariff3uu_basic']['add_before']['page'], 1, 0 );
 	}
 	echo ' value="1">' . esc_html__( 'Pages', 'shariff' ) . '</p>';
 
@@ -1113,14 +1114,13 @@ function shariff3uu_checkbox_buttonstretch_render() {
  * Border radius.
  */
 function shariff3uu_number_borderradius_render() {
-	$plugins_url = plugins_url();
 	if ( isset( $GLOBALS['shariff3uu_design']['borderradius'] ) ) {
 		$borderradius = $GLOBALS['shariff3uu_design']['borderradius'];
 	} else {
 		$borderradius = '';
 	}
 	echo '<input type="number" name="shariff3uu_design[borderradius]" value="' . esc_attr( $borderradius ) . '" maxlength="2" min="1" max="50" placeholder="50" style="width: 75px">';
-	echo '<img src="' . esc_url( $plugins_url ) . '/shariff/images/borderradius.png" align="top">';
+	echo '<img src="' . plugins_url() . '/shariff/images/borderradius.png" align="top">';
 }
 
 /**
@@ -1717,7 +1717,7 @@ function shariff3uu_help_section_callback() {
 		// Services.
 		echo '<div style="display:table-row">';
 			echo '<div style="display:table-cell;border:1px solid;padding:10px">services</div>';
-			echo '<div style="display:table-cell;border:1px solid;padding:10px">addthis<br>bitcoin<br>buffer<br>diaspora<br>facebook<br>flipboard<br>info<br>linkedin<br>mailto<br>mastodon<br>mewe<br>mix<br>odnoklassniki<br>patreon<br>paypal<br>paypalme<br>pinterest<br>pocket<br>printer<br>reddit<br>rss<br>sms<br>telegram<br>threema<br>tumblr<br>twitter<br>vk<br>wallabag<br>weibo<br>whatsapp<br>xing</div>';
+			echo '<div style="display:table-cell;border:1px solid;padding:10px">bitcoin<br>buffer<br>diaspora<br>facebook<br>flipboard<br>info<br>linkedin<br>mailto<br>mastodon<br>mewe<br>mix<br>odnoklassniki<br>patreon<br>paypal<br>paypalme<br>pinterest<br>pocket<br>printer<br>reddit<br>rss<br>sms<br>telegram<br>threema<br>tumblr<br>twitter<br>vk<br>wallabag<br>weibo<br>whatsapp<br>xing</div>';
 			echo '<div style="display:table-cell;border:1px solid;padding:10px">mastodon|facebook|linkedin|info</div>';
 			echo '<div style="display:table-cell;border:1px solid;padding:10px">[shariff services="facebook|mastodon|mailto"]</div>';
 			echo '<div style="display:table-cell;border:1px solid;padding:10px">' . esc_html__( 'Determines which buttons to show and in which order.', 'shariff' ) . '</div>';

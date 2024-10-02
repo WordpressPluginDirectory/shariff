@@ -3,7 +3,7 @@
  * Plugin Name: Shariff Wrapper
  * Plugin URI: https://wordpress.org/plugins-wp/shariff/
  * Description: Shariff provides share buttons that respect the privacy of your visitors and follow the General Data Protection Regulation (GDPR).
- * Version: 4.6.9
+ * Version: 4.6.14
  * Author: Jan-Peter Lambeck & 3UU
  * Author URI: https://wordpress.org/plugins/shariff/
  * License: MIT
@@ -34,7 +34,7 @@ $shariff3uu = array_merge( $shariff3uu_basic, $shariff3uu_design, $shariff3uu_ad
  */
 function shariff3uu_update() {
 	// Adjust code version.
-	$code_version = '4.6.9';
+	$code_version = '4.6.14';
 
 	// Get basic options.
 	$shariff3uu_basic = (array) get_option( 'shariff3uu_basic' );
@@ -64,7 +64,7 @@ function shariff3uu_privacy() {
 
 On our website we offer you the possibility to use so called "Social Media Buttons". To protect your data, we use a solution called "Shariff". Hereby the share buttons are implemented as static images, which contain a link to the corresponding social network site. If you click on such a button, you will be redirected to the respective social network site in the same way, as normal links would do as well. Only in that moment of time the provider of the social network site will get information about you, for example your IP address. If you do not click on such a share button, no data will be transmitted. Information about the collection and usage of your date on the social network sites can be found in the corresponding terms of use of the respective provider. More information about the plugin and the Shariff solution can be found here: <a href="https://wordpress.org/plugins/shariff/">https://wordpress.org/plugins/shariff/</a>
 
-On our website we offer share buttons for the following services / companies: AddThis, Diaspora, Facebook, Flattr, Flipboard, LinkedIn, Mastodon, Mix, Odnoklassniki, Patreon, PayPal, Pinterest, Pocket, Qzone, Reddit, Telegram, TencentWeibo, Threema, Tumblr, Twitter, VK, Wallabag, Weibo, WhatsApp, Xing.',
+On our website we offer share buttons for the following services / companies: Diaspora, Facebook, Flattr, Flipboard, LinkedIn, Mastodon, Mix, Odnoklassniki, Patreon, PayPal, Pinterest, Pocket, Qzone, Reddit, Telegram, TencentWeibo, Threema, Tumblr, Twitter, VK, Wallabag, Weibo, WhatsApp, Xing.',
 			'shariff'
 		);
 		wp_add_privacy_policy_content( 'Shariff Wrapper', wp_kses_post( wpautop( $content, false ) ) );
@@ -402,8 +402,14 @@ function shariff3uu_fetch_sharecounts( $service_array, $old_share_counts, $post_
 	$total_count  = 0;
 	$share_counts = array();
 
+	// what are valid service names for the include?
+	$valid_services= explode( '|', $shariff3uu['services'] );
+	
 	// Loop through all desired services.
 	foreach ( $service_array as $service ) {
+		// include/execute only valid services
+		if ( !in_array( $service , $valid_services, true )===true ) continue;
+
 		// Only include services that are not disabled.
 		if ( ! empty( $service ) && ( ! isset( $shariff3uu['disable'][ $service ] ) || ( isset( $shariff3uu['disable'][ $service ] ) && 0 === $shariff3uu['disable'][ $service ] ) ) ) {
 			// Determine path.
@@ -530,7 +536,7 @@ function shariff3uu_fill_cache_schedule() {
 add_action( 'shariff3uu_save_statistic_options', 'shariff3uu_fill_cache_schedule' );
 
 /** Registers activation hook to start cron job after an update. */
-register_activation_hook( __FILE__, 'shariff3uu_fill_cache_schedule' );
+register_activation_hook( __FILE__ , 'shariff3uu_fill_cache_schedule' );
 
 /**
  * Adds custom weekly cron recurrences.
@@ -566,13 +572,13 @@ function shariff3uu_posts( $content ) {
 
 	// Disable share buttons on password protected posts if configured in the admin menu.
 	if ( ( 1 === post_password_required( get_the_ID() ) || ! empty( $GLOBALS['post']->post_password ) ) && isset( $shariff3uu['disable_on_protected'] ) && 1 === $shariff3uu['disable_on_protected'] ) {
-		$shariff3uu['add_before']['posts']          = 0;
-		$shariff3uu['add_before']['posts_blogpage'] = 0;
-		$shariff3uu['add_before']['pages']          = 0;
-		$shariff3uu['add_after']['posts']           = 0;
-		$shariff3uu['add_after']['posts_blogpage']  = 0;
-		$shariff3uu['add_after']['pages']           = 0;
-		$shariff3uu['add_after']['custom_type']     = 0;
+		$shariff3uu['add_before']['post']	= 0;
+		$shariff3uu['add_before']['blogpage']	= 0;
+		$shariff3uu['add_before']['page']	= 0;
+		$shariff3uu['add_after']['post']	= 0;
+		$shariff3uu['add_after']['blogpage']	= 0;
+		$shariff3uu['add_after']['page']	= 0;
+		$shariff3uu['add_after']['custom_type']	= 0;
 	}
 
 	// If we want to see it as text - replace the slash.
@@ -585,12 +591,8 @@ function shariff3uu_posts( $content ) {
 		return $content;
 	}
 
-	// Type of current post.
+	// Type of current site.
 	$current_post_type = get_post_type();
-	if ( 'post' === $current_post_type ) {
-		$current_post_type = 'posts';
-	}
-
 	// Prevent php warnings in debug mode.
 	$add_before = 0;
 	$add_after  = 0;
@@ -598,26 +600,18 @@ function shariff3uu_posts( $content ) {
 	// Check if shariff should be added automatically (plugin options).
 	if ( ! is_singular() ) {
 		// On blog page.
-		if ( isset( $shariff3uu['add_before']['posts_blogpage'] ) && 1 === $shariff3uu['add_before']['posts_blogpage'] ) {
+		if ( isset( $shariff3uu['add_before']['blogpage'] ) && 1 === $shariff3uu['add_before']['blogpage'] ) {
 			$add_before = 1;
 		}
-		if ( isset( $shariff3uu['add_after']['posts_blogpage'] ) && 1 === $shariff3uu['add_after']['posts_blogpage'] ) {
+		if ( isset( $shariff3uu['add_after']['blogpage'] ) && 1 === $shariff3uu['add_after']['blogpage'] ) {
 			$add_after = 1;
 		}
-	} elseif ( is_singular( 'post' ) ) {
-		// On single post.
+	} elseif ( is_singular( 'post' ) || is_singular( 'page' ) ) {
+		// On single post or page.
 		if ( isset( $shariff3uu['add_before'][ $current_post_type ] ) && 1 === $shariff3uu['add_before'][ $current_post_type ] ) {
 			$add_before = 1;
 		}
 		if ( isset( $shariff3uu['add_after'][ $current_post_type ] ) && 1 === $shariff3uu['add_after'][ $current_post_type ] ) {
-			$add_after = 1;
-		}
-	} elseif ( is_singular( 'page' ) ) {
-		// On pages.
-		if ( isset( $shariff3uu['add_before']['pages'] ) && 1 === $shariff3uu['add_before']['pages'] ) {
-			$add_before = 1;
-		}
-		if ( isset( $shariff3uu['add_after']['pages'] ) && 1 === $shariff3uu['add_after']['pages'] ) {
 			$add_after = 1;
 		}
 	} else {
@@ -886,7 +880,7 @@ function shariff3uu_render( $atts ) {
 	}
 
 	// Stops all further actions if we are on an admin page.
-	if ( is_admin() ) {
+	if ( is_admin() && ! wp_doing_ajax() ) {
 		return null;
 	}
 
@@ -1088,7 +1082,7 @@ function shariff3uu_render( $atts ) {
 
 	// Adds the timestamp for the cache.
 	if ( array_key_exists( 'timestamp', $atts ) ) {
-		$post_timestamp = $atts['timestamp'];
+		$post_timestamp = absint( $atts['timestamp'] );
 	} else {
 		$post_timestamp = absint( get_the_modified_date( 'U' ) );
 	}
@@ -1097,15 +1091,15 @@ function shariff3uu_render( $atts ) {
 	$output .= '<div class="shariff';
 	// Alignment.
 	if ( array_key_exists( 'align', $atts ) && 'none' !== $atts['align'] ) {
-		$output .= ' shariff-align-' . $atts['align'];
+		$output .= ' shariff-align-' . esc_attr( $atts['align'] );
 	}
 	// Alignment widget.
 	if ( array_key_exists( 'align_widget', $atts ) && 'none' !== $atts['align_widget'] ) {
-		$output .= ' shariff-widget-align-' . $atts['align_widget'];
+		$output .= ' shariff-widget-align-' . esc_attr( $atts['align_widget'] );
 	}
 	// Button Stretch.
 	// phpcs:ignore
-	if ( array_key_exists( 'buttonstretch', $atts ) && 1 == $atts['buttonstretch'] ) {
+	if ( array_key_exists( 'buttonstretch', $atts ) && 1 === $atts['buttonstretch'] ) {
 		$output .= ' shariff-buttonstretch';
 	}
 	$output .= '"';
@@ -1119,14 +1113,14 @@ function shariff3uu_render( $atts ) {
 		// Share url.
 		$output .= ' data-url="' . esc_html( $share_url ) . '"';
 		// Timestamp for cache.
-		$output .= ' data-timestamp="' . $post_timestamp . '"';
+		$output .= ' data-timestamp="' . esc_attr( $post_timestamp ) . '"';
 		// Hides share counts when they are zero.
 		if ( isset( $atts['hidezero'] ) && 1 === $atts['hidezero'] ) {
 			$output .= ' data-hidezero="1"';
 		}
 		// Add external api if entered, elseif test the subapi setting, elseif pretty permalinks are not activated fall back to manual rest route, else use the home url.
 		if ( isset( $shariff3uu['external_host'] ) && ! empty( $shariff3uu['external_host'] ) && isset( $shariff3uu['external_direct'] ) ) {
-			$output .= ' data-backendurl="' . $shariff3uu['external_host'] . '"';
+			$output .= ' data-backendurl="' . esc_attr($shariff3uu['external_host']) . '"';
 		} elseif ( isset( $shariff3uu['subapi'] ) && 1 === $shariff3uu['subapi'] ) {
 			$output .= ' data-backendurl="' . strtok( get_bloginfo( 'wpurl' ), '?' ) . '/wp-json/shariff/v1/share_counts?"';
 		} elseif ( ! get_option( 'permalink_structure' ) ) {
@@ -1227,7 +1221,7 @@ function shariff3uu_render( $atts ) {
 
 				// Replace $main_color with $wcag_color and $secondary_color with $wcag_secondary, if $wacg_theme is selected.
 				if ( isset( $atts['theme'] ) && 'wcag' === $atts['theme'] && isset( $wcag_color ) && '' !== $wcag_color ) {
-					$main_color      = $wcag_color;
+					$main_color      = esc_attr( $wcag_color );
 					$secondary_color = '#000';
 				}
 
@@ -1238,7 +1232,7 @@ function shariff3uu_render( $atts ) {
 				}
 
 				// Start <li.
-				$output .= '<li class="shariff-button ' . $service;
+				$output .= '<li class="shariff-button ' . esc_attr( $service ) ;
 
 				// No custom colors.
 				if ( ! array_key_exists( 'maincolor', $atts ) ) {
@@ -1255,10 +1249,10 @@ function shariff3uu_render( $atts ) {
 					// Custom colors?
 					if ( array_key_exists( 'secondarycolor', $atts ) ) {
 						$output .= ' shariff-secondary-color';
-						$css     = '.shariff-secondary-color{background-color:' . $atts['secondarycolor'] . '}';
+						$css     = '.shariff-secondary-color{background-color:' . esc_attr( $atts['secondarycolor'] ) . '}';
 					} else {
-						$output .= ' shariff-' . $service . '-secondary-color';
-						$css     = '.shariff-' . $service . '-secondary-color{background-color:' . $secondary_color . '}';
+						$output .= ' shariff-' . esc_attr( $service ) . '-secondary-color';
+						$css     = '.shariff-' . esc_attr( $service ) . '-secondary-color{background-color:' . $secondary_color . '}';
 					}
 					if ( false === strpos( $dynamic_css, $css ) ) {
 						$dynamic_css .= $css;
@@ -1275,12 +1269,12 @@ function shariff3uu_render( $atts ) {
 					$output .= '" style="';
 					// Custom colors?
 					if ( array_key_exists( 'secondarycolor', $atts ) ) {
-						$output .= 'background-color:' . $atts['secondarycolor'];
+						$output .= 'background-color:' . esc_attr( $atts['secondarycolor'] );
 					} else {
 						$output .= 'background-color:' . $secondary_color;
 					}
 					// Border radius?
-					if ( array_key_exists( 'borderradius', $atts ) && array_key_exists( 'theme', $atts ) && 'round' === $atts['theme'] ) {
+					if ( array_key_exists( 'borderradius', $atts ) && array_key_exists( 'theme', $atts ) && 'round' === $atts['theme'] && is_numeric( $atts['borderradius'] ) ) {
 						$output       .= ';border-radius:' . $atts['borderradius'] . '%';
 						$border_radius = ';border-radius:' . $atts['borderradius'] . '%';
 					}
@@ -1345,7 +1339,7 @@ function shariff3uu_render( $atts ) {
 					// Custom color?
 					if ( array_key_exists( 'maincolor', $atts ) ) {
 						$output .= ' shariff-main-color';
-						$css     = '.shariff-main-color{background-color:' . $atts['maincolor'] . '}';
+						$css     = '.shariff-main-color{background-color:' . esc_attr( $atts['maincolor'] ) . '}';
 					} else {
 						$output .= ' shariff-' . $service . '-main-color';
 						$css     = '.shariff-' . $service . '-main-color{background-color:' . $main_color . '}';
@@ -1357,7 +1351,7 @@ function shariff3uu_render( $atts ) {
 					if ( isset( $atts['theme'] ) && 'white' === $atts['theme'] ) {
 						if ( array_key_exists( 'maincolor', $atts ) ) {
 							$output .= ' shariff-text-color"';
-							$css     = '.shariff-text-color{color:' . $atts['maincolor'] . '}';
+							$css     = '.shariff-text-color{color:' . esc_attr( $atts['maincolor'] ) . '}';
 						} else {
 							$output .= ' shariff-' . $service . '-text-color"';
 							$css     = '.shariff-' . $service . '-text-color{color:' . $main_color . '}';
@@ -1373,14 +1367,14 @@ function shariff3uu_render( $atts ) {
 					$output .= '" style="' . $border_radius;
 					// Custom color?
 					if ( array_key_exists( 'maincolor', $atts ) ) {
-						$output .= '; background-color:' . $atts['maincolor'];
+						$output .= '; background-color:' . esc_attr( $atts['maincolor'] );
 					} else {
 						$output .= '; background-color:' . $main_color;
 					}
 					// Theme white?
 					if ( isset( $atts['theme'] ) && 'white' === $atts['theme'] ) {
 						if ( array_key_exists( 'maincolor', $atts ) ) {
-							$output .= '; color:' . $atts['maincolor'] . '"';
+							$output .= '; color:' . esc_attr( $atts['maincolor'] ) . '"';
 						} else {
 							$output .= '; color:' . $main_color . '"';
 						}
@@ -1405,7 +1399,7 @@ function shariff3uu_render( $atts ) {
 					if ( isset( $atts['theme'] ) && 'white' === $atts['theme'] ) {
 						if ( array_key_exists( 'maincolor', $atts ) ) {
 							$output .= ' shariff-svg-color';
-							$css     = '.shariff-svg-color{fill:' . $atts['maincolor'] . '}';
+							$css     = '.shariff-svg-color{fill:' . esc_attr( $atts['maincolor'] ) . '}';
 						} else {
 							$output .= ' shariff-' . $service . '-svg-color';
 							$css     = '.shariff-' . $service . '-svg-color{fill:' . $main_color . '}';
@@ -1419,7 +1413,7 @@ function shariff3uu_render( $atts ) {
 					// Theme white?
 					if ( isset( $atts['theme'] ) && 'white' === $atts['theme'] ) {
 						if ( array_key_exists( 'maincolor', $atts ) ) {
-							$output .= 'fill:' . $atts['maincolor'];
+							$output .= 'fill:' . esc_attr( $atts['maincolor'] );
 						} else {
 							$output .= 'fill:' . $main_color;
 						}
@@ -1436,7 +1430,7 @@ function shariff3uu_render( $atts ) {
 						if ( isset( $atts['theme'] ) && 'white' === $atts['theme'] ) {
 							if ( array_key_exists( 'maincolor', $atts ) ) {
 								$output .= ' shariff-text-color';
-								$css     = '.shariff-text-color{color:' . $atts['maincolor'] . '}';
+								$css     = '.shariff-text-color{color:' . esc_attr( $atts['maincolor'] ) . '}';
 							} else {
 								$output .= ' shariff-' . $service . '-text-color';
 								$css     = '.shariff-' . $service . '-text-color{color:' . $main_color . '}';
@@ -1449,7 +1443,7 @@ function shariff3uu_render( $atts ) {
 						// Theme white?
 						if ( isset( $atts['theme'] ) && 'white' === $atts['theme'] ) {
 							if ( array_key_exists( 'maincolor', $atts ) ) {
-								$output .= '" style="color:' . $atts['maincolor'];
+								$output .= '" style="color:' . esc_attr( $atts['maincolor'] );
 							} else {
 								$output .= '" style="color:' . $main_color;
 							}
@@ -1598,7 +1592,7 @@ function shariff3uu_deactivate() {
 		wp_clear_scheduled_hook( 'shariff3uu_fill_cache' );
 	}
 }
-register_deactivation_hook( __FILE__, 'shariff3uu_deactivate' );
+register_deactivation_hook( __FILE__ , 'shariff3uu_deactivate' );
 
 /**
  * Purges all the transients associated with our plugin.
